@@ -62,56 +62,104 @@ function put(id,v){$(id).textContent=v||'—'}
 function render(){put('pShop',$('shop').value||'ReireiAfterSugal');put('pNo',$('invoiceNo').value||'—');put('pDate',dateText($('invoiceDate').value));put('pLocation',$('location').value);put('pSchedule','Monday / Wednesday / Friday / Sunday');put('pCourier','LBC / Lalamove / Flash');put('pGcash',$('gcash').value);put('pBank',$('bank').value);put('pPaypal',$('paypal').value);put('pThanks',$('thanks').value);const list=$('pItems');list.replaceChildren();let total=0,shown=0;getItems().forEach(it=>{if(!it.name&&!it.hasPrice)return;shown++;total+=it.price;const line=document.createElement('div');line.className='line-item';const n=document.createElement('span');n.textContent=it.name||'Item Name';const p=document.createElement('span');p.className='amount';p.textContent=money(it.price);line.append(n,p);list.append(line)});if(!shown){const e=document.createElement('div');e.className='empty';e.textContent='Your items will appear here';list.append(e)}$('pTotal').textContent=money(total)}
 function invoiceText(){const items=getItems().filter(i=>i.name||i.hasPrice);return ['INVOICE',$('shop').value,`Invoice No. ${$('invoiceNo').value} • Date: ${dateText($('invoiceDate').value)}`,'','ITEM                         PRICE',...items.map(i=>`${i.name||'Item Name'}    ${money(i.price)}`),'',`TOTAL                         ${money(items.reduce((s,i)=>s+i.price,0))}`,'','LOCATION',$('location').value,'','SHIPPING SCHEDULE','Monday / Wednesday / Friday / Sunday','','SHIPPING','LBC / Lalamove / Flash','','PAYMENT METHOD',`GCASH: ${$('gcash').value}`,'(FOR QR JUST REQUEST)',`BANK TRANSFER: ${$('bank').value}`,`PAYPAL: ${$('paypal').value}`,'',$('thanks').value].join('\\n')}
 async function exportImage(type){
-  // Render the invoice directly on a canvas instead of relying on SVG foreignObject,
-  // which many browsers block when exporting HTML to an image.
-  const scale=2, width=900, pad=54, inner=width-pad*2;
-  const canvas=document.createElement('canvas'); const ctx=canvas.getContext('2d');
-  const ink='#161210', cream='#fff8ec', cream2='#efe8d6', pink='#ff2d78', pinkdeep='#d4004f', purple='#5a2a91';
+  // Draw the same centered receipt hierarchy as the live preview.
+  // Height is calculated from the content, so long receipts are not cut off.
+  if(document.fonts?.ready) await document.fonts.ready;
+  const scale=2, width=480, outer=16, pad=30, inner=width-pad*2;
+  const ink='#161210', cream='#fff8ec', cream2='#e6ddc4', pink='#ff2d78', pinkdeep='#d4004f', purple='#5a2a91';
   const shop=$('shop').value||'ReireiAfterSugal', no=$('invoiceNo').value||'—', date=dateText($('invoiceDate').value);
-  const items=getItems().filter(i=>i.name||i.hasPrice); const total=items.reduce((sum,i)=>sum+i.price,0);
-  const fontMono='700 18px "Space Mono", monospace', fontSmall='16px "Space Mono", monospace';
-  let y=46;
-  // Measure content first using a temporary canvas at final scale.
+  const items=getItems().filter(i=>i.name||i.hasPrice), total=items.reduce((sum,i)=>sum+i.price,0);
+  const mono='11px "Space Mono", monospace', monoSmall='10px "Space Mono", monospace';
+  const monoBold='700 10px "Space Mono", monospace', labelFont='700 9px "Space Mono", monospace';
+  const titleFont='38px Anton, Impact, sans-serif', brandFont='21px Anton, Impact, sans-serif';
   const measure=document.createElement('canvas').getContext('2d');
-  function wrap(text,font,maxWidth){measure.font=font;const words=String(text??'—').split(/\s+/);const lines=[];let line='';for(const word of words){const test=line?line+' '+word:word;if(measure.measureText(test).width>maxWidth&&line){lines.push(line);line=word}else line=test}if(line)lines.push(line);return lines.length?lines:['—']}
-  const chunks=[]; function addText(text,font,color=ink,maxWidth=inner,lineH=26){const lines=wrap(text,font,maxWidth);chunks.push({type:'text',lines,font,color,y,lineH});y+=lines.length*lineH}
-  function addRule(margin=20){y+=margin;chunks.push({type:'rule',y});y+=margin+2}
-  function addSection(label,value){y+=12;addText(label.toUpperCase(),'700 15px "Space Mono", monospace',purple,inner,22);addText(value,fontSmall,ink,inner,25)}
-  // Top brand/title and meta
-  addText(shop,'34px Anton, Impact, sans-serif',ink,inner-100,42); y+=3;
-  addText('INVOICE','64px Anton, Impact, sans-serif',ink,inner,70);
-  addText('INVOICE NO. '+no+'    •    DATE: '+date,'16px "Space Mono", monospace',ink,inner,25);
-  addRule(20); addText('ITEM','700 16px "Space Mono", monospace',ink,inner*.68,24);
-  // price heading right-aligned later
-  chunks.push({type:'rightText',text:'PRICE',font:'700 16px "Space Mono", monospace',color:ink,y:y-24});
-  for(const it of items){const lines=wrap(it.name||'Item Name',fontSmall,inner-190);const lineH=26;chunks.push({type:'item',lines,price:money(it.price),y,lineH});y+=Math.max(1,lines.length)*lineH+4}
-  if(!items.length){addText('Your items will appear here',fontSmall,'#777777',inner,25)}
-  addRule(14);
-  chunks.push({type:'total',y,total:money(total)}); y+=45; addRule(8);
-  addSection('⌖ Location',$('location').value||'—');
-  addSection('↗ Shipping schedule','Monday / Wednesday / Friday / Sunday');
-  addSection('↗ Shipping','LBC / Lalamove / Flash');
-  addRule(8); addSection('Payment method','GCASH: '+($('gcash').value||'—'));
-  addText('(FOR QR JUST REQUEST)',fontSmall,ink,inner,25);
-  addText('BANK TRANSFER: '+($('bank').value||'—'),fontSmall,ink,inner,25);
-  addText('PAYPAL: '+($('paypal').value||'—'),fontSmall,ink,inner,25);
-  addRule(10); addText($('thanks').value||'Thank you for The Budol! 🤝','26px Anton, Impact, sans-serif',ink,inner,32);
-  addText('THANK YOU FOR SHOPPING SMALL ♡','13px "Space Mono", monospace',ink,inner,22); y+=35;
-  const height=Math.max(700,y+18); canvas.width=width*scale;canvas.height=height*scale;ctx.scale(scale,scale);
+  const chunks=[]; let y=46;
+  function wrap(text,font,maxWidth){
+    measure.font=font; const words=String(text??'—').split(/\s+/); const lines=[]; let line='';
+    for(const word of words){const test=line?line+' '+word:word;
+      if(measure.measureText(test).width>maxWidth&&line){lines.push(line);line=word}else line=test}
+    if(line)lines.push(line); return lines.length?lines:['—'];
+  }
+  function text(text,font,color=ink,align='left',maxWidth=inner,lineH=20, gapAfter=0){
+    const lines=wrap(text,font,maxWidth); chunks.push({type:'text',lines,font,color,align,y,lineH}); y+=lines.length*lineH+gapAfter;
+  }
+  function centered(text,font,color=ink,maxWidth=inner,lineH=20,gapAfter=0){textFn(text,font,color,'center',maxWidth,lineH,gapAfter)}
+  function textFn(text,font,color,align,maxWidth,lineH,gapAfter){
+    const lines=wrap(text,font,maxWidth); chunks.push({type:'text',lines,font,color,align,y,lineH}); y+=lines.length*lineH+gapAfter;
+  }
+  function rule(top=14,bottom=14){y+=top;chunks.push({type:'rule',y});y+=bottom+2}
+  function section(label,value){
+    y+=10; text(label, labelFont, purple, 'left', inner, 16, 2);
+    text(value||'—', monoSmall, ink, 'left', inner, 19, 0);
+  }
+  // Centered header, matching the preview's centered brand/title/meta.
+  textFn(shop,brandFont,ink,'center',inner-90,31,2);
+  textFn('INVOICE',titleFont,ink,'center',inner,58,2);
+  textFn('INVOICE NO. '+no+'   •   DATE: '+date,monoSmall,ink,'center',inner,18,0);
+  rule(14,13);
+  chunks.push({type:'tableHead',y}); y+=18;
+  for(const it of items){
+    const lines=wrap(it.name||'Item Name',mono,inner-100);
+    chunks.push({type:'item',lines,price:money(it.price),y,lineH:19});
+    y+=Math.max(1,lines.length)*19+3;
+  }
+  if(!items.length){textFn('Your items will appear here',monoSmall,'#777777','left',inner,19,0)}
+  rule(12,12);
+  chunks.push({type:'total',y}); y+=34;
+  rule(7,5);
+  section('⌖ LOCATION',$('location').value);
+  section('↗ SHIPPING SCHEDULE','Monday / Wednesday / Friday / Sunday');
+  section('↗ SHIPPING','LBC / Lalamove / Flash');
+  rule(7,3);
+  y+=7; text('PAYMENT METHOD',labelFont,purple,'left',inner,16,3);
+  text('GCASH: '+($('gcash').value||'—'),monoSmall,ink,'left',inner,19,0);
+  text('(FOR QR JUST REQUEST)',monoSmall,ink,'left',inner,19,0);
+  text('BANK TRANSFER: '+($('bank').value||'—'),monoSmall,ink,'left',inner,19,0);
+  text('PAYPAL: '+($('paypal').value||'—'),monoSmall,ink,'left',inner,19,0);
+  rule(8,3);
+  textFn($('thanks').value||'Thank you for The Budol! 🤝','17px Anton, Impact, sans-serif',ink,'center',inner,24,2);
+  textFn('THANK YOU FOR SHOPPING SMALL ♡','9px "Space Mono", monospace',ink,'center',inner,15,18);
+
+  const height=Math.max(500,Math.ceil(y+outer+12));
+  const canvas=document.createElement('canvas'); canvas.width=width*scale; canvas.height=height*scale;
+  const ctx=canvas.getContext('2d'); ctx.scale(scale,scale);
+  // Preview-like paper background, dotted texture, and inset receipt.
   ctx.fillStyle=cream2;ctx.fillRect(0,0,width,height);
-  // subtle dotted paper texture
-  ctx.fillStyle='#d8cfbb';for(let yy=10;yy<height;yy+=22)for(let xx=10;xx<width;xx+=22){ctx.beginPath();ctx.arc(xx,yy,1,0,Math.PI*2);ctx.fill()}
-  ctx.fillStyle=cream;ctx.strokeStyle=ink;ctx.lineWidth=4;ctx.fillRect(24,24,width-48,height-48);ctx.strokeRect(24,24,width-48,height-48);
-  // corner stamp
-  ctx.save();ctx.translate(width-118,62);ctx.rotate(.45);ctx.fillStyle=pink;ctx.strokeStyle=ink;ctx.lineWidth=2;ctx.fillRect(-83,-15,166,30);ctx.strokeRect(-83,-15,166,30);ctx.fillStyle=ink;ctx.font='16px Anton, Impact, sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('BUDOL RECEIPT',0,0);ctx.restore();
+  ctx.fillStyle='#d8cfbb';
+  for(let yy=10;yy<height;yy+=22)for(let xx=10;xx<width;xx+=22){ctx.beginPath();ctx.arc(xx,yy,1,0,Math.PI*2);ctx.fill()}
+  function roundedRect(x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath()}
+  ctx.fillStyle=cream;ctx.strokeStyle=ink;ctx.lineWidth=3;roundedRect(outer,outer,width-outer*2,height-outer*2,12);ctx.fill();ctx.stroke();
+  // Diagonal BUDOL RECEIPT ribbon like the live preview.
+  ctx.save();ctx.translate(width-65,43);ctx.rotate(35*Math.PI/180);
+  ctx.fillStyle=pink;ctx.strokeStyle=ink;ctx.lineWidth=2;ctx.fillRect(-77,-12,154,24);ctx.strokeRect(-77,-12,154,24);
+  ctx.fillStyle=ink;ctx.font='10px Anton, Impact, sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('BUDOL RECEIPT',0,0);ctx.restore();
+
   for(const c of chunks){
     if(c.type==='rule'){ctx.strokeStyle=ink;ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(pad,c.y);ctx.lineTo(width-pad,c.y);ctx.stroke();continue}
-    if(c.type==='rightText'){ctx.font=c.font;ctx.fillStyle=c.color;ctx.textAlign='right';ctx.textBaseline='top';ctx.fillText(c.text,width-pad,c.y);continue}
-    if(c.type==='item'){ctx.font=fontSmall;ctx.fillStyle=ink;ctx.textAlign='left';ctx.textBaseline='top';c.lines.forEach((line,i)=>ctx.fillText(line,pad,c.y+i*c.lineH));ctx.font=fontMono;ctx.textAlign='right';ctx.fillText(c.price,width-pad,c.y);continue}
-    if(c.type==='total'){ctx.font='30px Anton, Impact, sans-serif';ctx.fillStyle=ink;ctx.textAlign='left';ctx.textBaseline='top';ctx.fillText('TOTAL',pad,c.y);ctx.fillStyle=pinkdeep;ctx.textAlign='right';ctx.font='36px Anton, Impact, sans-serif';ctx.fillText(c.total,width-pad,c.y-2);continue}
-    ctx.font=c.font;ctx.fillStyle=c.color;ctx.textAlign='left';ctx.textBaseline='top';c.lines.forEach((line,i)=>ctx.fillText(line,pad,c.y+i*c.lineH));
+    if(c.type==='tableHead'){
+      ctx.font=monoBold;ctx.fillStyle=ink;ctx.textBaseline='top';ctx.textAlign='left';ctx.fillText('ITEM',pad,c.y);
+      ctx.textAlign='right';ctx.fillText('PRICE',width-pad,c.y);continue;
+    }
+    if(c.type==='item'){
+      ctx.font=mono;ctx.fillStyle=ink;ctx.textAlign='left';ctx.textBaseline='top';
+      c.lines.forEach((line,i)=>ctx.fillText(line,pad,c.y+i*c.lineH));
+      ctx.font=monoBold;ctx.textAlign='right';ctx.fillText(c.price,width-pad,c.y);continue;
+    }
+    if(c.type==='total'){
+      ctx.textBaseline='top';ctx.textAlign='left';ctx.font='20px Anton, Impact, sans-serif';ctx.fillStyle=ink;ctx.fillText('TOTAL',pad,c.y);
+      ctx.textAlign='right';ctx.font='23px Anton, Impact, sans-serif';ctx.fillStyle=pinkdeep;ctx.fillText(money(total),width-pad,c.y-2);continue;
+    }
+    ctx.font=c.font;ctx.fillStyle=c.color;ctx.textBaseline='top';
+    ctx.textAlign=c.align==='center'?'center':'left';
+    const x=c.align==='center'?width/2:pad;
+    c.lines.forEach((line,i)=>ctx.fillText(line,x,c.y+i*c.lineH));
   }
-  canvas.toBlob(blob=>{if(!blob){alert('Could not create the image. Please try again.');return}const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='ReireiAfterSugal-Invoice-'+(no||'1')+'.'+(type==='jpeg'?'jpg':'png');document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),2000)},type==='jpeg'?'image/jpeg':'image/png',.95);
+  canvas.toBlob(blob=>{
+    if(!blob){alert('Could not create the image. Please try again.');return}
+    const url=URL.createObjectURL(blob), a=document.createElement('a');
+    a.href=url;a.download='ReireiAfterSugal-Invoice-'+(no||'1')+'.'+(type==='jpeg'?'jpg':'png');
+    document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),2000);
+  },type==='jpeg'?'image/jpeg':'image/png',.95);
 }
 $('addItem').addEventListener('click',()=>addItem());$('pngBtn').addEventListener('click',()=>exportImage('png'));$('jpgBtn').addEventListener('click',()=>exportImage('jpeg'));$('copyBtn').addEventListener('click',async()=>{try{await navigator.clipboard.writeText(invoiceText());$('copyBtn').textContent='Copied!';setTimeout(()=>$('copyBtn').textContent='Copy text',1500)}catch(e){prompt('Copy your invoice text:',invoiceText())}});$('resetBtn').addEventListener('click',()=>{$('shop').value='ReireiAfterSugal';$('invoiceNo').value='1';$('invoiceDate').value='2026-10-29';$('location').value='Quezon City, NCR';$('gcash').value='09672473246 AN****Y JO*N C.';$('bank').value='To Be Added';$('paypal').value='To Be Added';$('thanks').value='Thank you for The Budol! 🤝';$('items').replaceChildren();addItem();addItem();addItem();render()});document.querySelectorAll('.editor input,.editor select').forEach(el=>{el.addEventListener('input',render);el.addEventListener('change',render)});addItem();addItem();addItem();
 })();
