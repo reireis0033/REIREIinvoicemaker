@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ReireiAfterSugal — Invoice Studio</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Anton&family=Space+Mono:wght@400;700&display=swap');
+:root{--cream:#efe8d6;--cream2:#e6ddc4;--pink:#ff2d78;--pinkdeep:#d4004f;--purple:#5a2a91;--ink:#161210;--white:#fff8ec;--line:#161210;--shadow:6px 6px 0 var(--ink)}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 1px 1px,rgba(22,18,16,.08) 1px,transparent 0) 0 0/22px 22px,var(--cream);color:var(--ink);font-family:'Space Mono',monospace;font-size:13px}
+.chrome{background:var(--ink);color:var(--cream);display:flex;align-items:center;gap:14px;padding:13px 24px;position:sticky;top:0;z-index:5}.chrome-mark{width:35px;height:35px;border:2px solid var(--cream);background:var(--pink);border-radius:50% 50% 50% 4px}.chrome-url{flex:1;text-align:center;border:1px solid #ffffff40;border-radius:999px;padding:9px;color:var(--pink);letter-spacing:2px;font-family:Anton,sans-serif;font-size:14px}.chrome small{color:#fff8ec88}
+header{background:var(--cream2);border-bottom:3px solid var(--ink);padding:22px 24px;text-align:center}.logo{font-family:Anton,sans-serif;text-transform:uppercase;font-size:clamp(25px,4vw,38px);letter-spacing:1px}.logo span{color:var(--pinkdeep)}header p{margin:6px 0 0;font-size:11px;letter-spacing:1px;text-transform:uppercase}
+main{max-width:1200px;margin:auto;padding:24px 20px 50px}.layout{display:grid;grid-template-columns:minmax(300px,.9fr) minmax(300px,1.1fr);gap:24px;align-items:start}.panel{background:var(--white);border:3px solid var(--ink);border-radius:14px;padding:20px;box-shadow:var(--shadow)}h2{font:400 20px Anton,sans-serif;text-transform:uppercase;letter-spacing:.8px;margin:0 0 17px}.field{display:flex;flex-direction:column;gap:6px;margin-bottom:13px}label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.7px}input,select{font:12px 'Space Mono',monospace;width:100%;border:2px solid var(--ink);border-radius:7px;background:#fffdf7;padding:10px;color:var(--ink);min-width:0}input:focus,select:focus{outline:3px solid var(--pink);outline-offset:1px}.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}.section-title{font:400 17px Anton,sans-serif;text-transform:uppercase;margin:18px 0 10px;border-bottom:2px solid var(--ink);padding-bottom:7px}.items-head,.item-row{display:grid;grid-template-columns:minmax(0,1fr) 105px 34px;gap:7px;align-items:center}.items-head{font-size:9px;font-weight:bold;margin:0 0 7px}.item-row{margin-bottom:8px}.remove{height:37px;border:2px solid var(--ink);background:var(--pink);font-size:19px;border-radius:7px;cursor:pointer}.btns{display:flex;gap:9px;flex-wrap:wrap;margin-top:14px}button{font:700 11px 'Space Mono',monospace;border:2px solid var(--ink);border-radius:999px;background:var(--white);padding:11px 14px;cursor:pointer;box-shadow:3px 3px 0 var(--ink);text-transform:uppercase}button:hover{transform:translate(-1px,-1px);box-shadow:5px 5px 0 var(--ink)}button.primary{background:var(--pink);color:var(--ink)}button.purple{background:var(--purple);color:white}.hint{font-size:10px;line-height:1.6;opacity:.72}
+.invoice{background:var(--white);border:3px solid var(--ink);border-radius:12px;box-shadow:var(--shadow);padding:clamp(20px,3.2vw,34px);position:relative;overflow:hidden}.invoice:before{content:'BUDOL RECEIPT';position:absolute;top:17px;right:-35px;transform:rotate(35deg);background:var(--pink);border:2px solid var(--ink);padding:5px 35px;font:12px Anton,sans-serif;letter-spacing:1px}.brand{text-align:center;font:400 25px Anton,sans-serif;text-transform:uppercase;overflow-wrap:anywhere;padding:6px 45px 0}.invoice-title{text-align:center;font:400 48px Anton,sans-serif;letter-spacing:4px;line-height:1.2;margin:5px 0}.meta{text-align:center;font-size:10px;letter-spacing:.2px;margin-bottom:20px}.pill{display:inline-block;background:var(--purple);color:var(--white);padding:4px 9px;border:2px solid var(--ink);transform:rotate(-1deg);font-size:9px;font-weight:bold;text-transform:uppercase}.rule{border:0;border-top:2px solid var(--ink);margin:15px 0}.table-head,.line-item{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px}.table-head{font-size:10px;font-weight:bold;margin-bottom:9px}.line-item{padding:5px 0;overflow-wrap:anywhere;font-size:12px}.amount{text-align:right;white-space:nowrap;font-weight:bold}.total-row{display:flex;justify-content:space-between;gap:12px;align-items:center;font:400 22px Anton,sans-serif}.total-amount{font-size:27px;color:var(--pinkdeep)}.section{margin:14px 0}.section-label{font-size:9px;font-weight:bold;letter-spacing:1px;margin-bottom:4px;color:var(--purple);text-transform:uppercase}.section-value{white-space:pre-wrap;overflow-wrap:anywhere;font-size:11px;line-height:1.65}.thanks{text-align:center;font:400 17px Anton,sans-serif;text-transform:uppercase;margin-top:17px}.empty{font-style:italic;opacity:.65}.footer-note{text-align:center;font-size:9px;margin-top:16px;letter-spacing:.5px}
+@media(max-width:780px){.layout{grid-template-columns:1fr}.chrome{padding:10px 14px}.chrome small{display:none}main{padding:16px 12px 35px}.panel{padding:16px}}
+@media print{.editor,.chrome,header,.preview-heading,.screen-only{display:none!important}body{background:white}.layout{display:block}main{padding:0;max-width:none}.panel.preview-panel{border:0;box-shadow:none;padding:0;background:white}.invoice{box-shadow:none}}
+</style>
+</head>
+<body>
+<div class="chrome"><span class="chrome-mark"></span><div class="chrome-url">REIREIAFTER SUGAL / INVOICE STUDIO</div><small>DESIGN • CREATE • SEND</small></div>
+<header><div class="logo">Reirei<span>After</span>Sugal</div><p>Invoice generator · Custom order receipts</p></header>
+<main><div class="layout">
+<section class="panel editor">
+<h2>✳ Customize your invoice</h2>
+<div class="field"><label for="shop">Shop name</label><input id="shop" value="ReireiAfterSugal"></div>
+<div class="two"><div class="field"><label for="invoiceNo">Invoice number</label><input id="invoiceNo" value="1" placeholder="001"></div><div class="field"><label for="invoiceDate">Invoice date</label><input id="invoiceDate" type="date" value="2026-10-29"></div></div>
+<div class="field"><label for="location">Location</label><input id="location" value="Quezon City, NCR"></div>
+<div class="section-title">01 / Order items</div>
+<div class="items-head"><span>ITEM NAME</span><span>PRICE (₱)</span><span></span></div><div id="items"></div>
+<div class="btns"><button id="addItem" type="button">＋ Add item</button></div>
+<div class="section-title">02 / Shipping details</div>
+<div class="field"><label>Shipping schedule · Info</label><div class="hint">Monday / Wednesday / Friday / Sunday</div></div>
+<div class="field"><label>Shipping courier · Info</label><div class="hint">LBC / Lalamove / Flash</div></div>
+<div class="section-title">03 / Payment information</div>
+<div class="field"><label for="gcash">GCash number and account name</label><input id="gcash" value="09672473246 AN****Y JO*N C."></div>
+<div class="field"><label for="bank">Bank transfer details</label><input id="bank" value="To Be Added"></div>
+<div class="field"><label for="paypal">PayPal details</label><input id="paypal" value="To Be Added"></div>
+<div class="field"><label for="thanks">Thank-you message</label><input id="thanks" value="Thank you for The Budol! 🤝"></div>
+<div class="btns"><button class="primary" id="pngBtn" type="button">↓ Download PNG</button><button class="purple" id="jpgBtn" type="button">↓ Download JPEG</button><button id="copyBtn" type="button">Copy text</button><button id="resetBtn" type="button">Reset</button></div>
+<p class="hint">PNG is best for crisp text and sharing. JPEG creates a smaller image file. Invoice number and date are editable. Downloads are generated directly in your browser.</p>
+</section>
+<section class="panel preview-panel"><h2 class="preview-heading">✳ Live preview</h2>
+<div class="invoice" id="invoicePreview">
+<div class="brand" id="pShop">ReireiAfterSugal</div><div class="invoice-title">INVOICE</div><div class="meta">INVOICE NO. <strong id="pNo">1</strong> <span class="pill" id="pDate">10-29-26</span></div>
+<hr class="rule"><div class="table-head"><span>ITEM</span><span class="amount">PRICE</span></div><div id="pItems"></div>
+<hr class="rule"><div class="total-row"><span>TOTAL</span><span class="total-amount" id="pTotal">₱0.00</span></div><hr class="rule">
+<div class="section"><div class="section-label">⌖ Location</div><div class="section-value" id="pLocation">Quezon City, NCR</div></div>
+<div class="section"><div class="section-label">↗ Shipping schedule</div><div class="section-value" id="pSchedule">Monday / Wednesday / Friday / Sunday</div></div>
+<div class="section"><div class="section-label">↗ Shipping</div><div class="section-value" id="pCourier">LBC / Lalamove / Flash</div></div>
+<hr class="rule"><div class="section"><div class="section-label">Payment method</div><div class="section-value">GCASH: <span id="pGcash">09672473246 AN****Y JO*N C.</span></div><div class="section-value">(FOR QR JUST REQUEST)</div><div class="section-value">BANK TRANSFER: <span id="pBank">To Be Added</span></div><div class="section-value">PAYPAL: <span id="pPaypal">To Be Added</span></div></div>
+<hr class="rule"><div class="thanks" id="pThanks">Thank you for The Budol! 🤝</div><div class="footer-note">THANK YOU FOR SHOPPING SMALL ♡</div>
+</div><p class="hint screen-only">Your image export captures the invoice design only, not the editor controls.</p>
+</section></div></main>
+<script>
+(()=> {
+const $=id=>document.getElementById(id);
+let itemCount=0;
+const money=n=>'₱'+(Number.isFinite(n)?n:0).toLocaleString('en-PH',{minimumFractionDigits:2,maximumFractionDigits:2});
+function addItem(name='',price=''){const row=document.createElement('div');row.className='item-row';const a=document.createElement('input');a.placeholder='Item name';a.setAttribute('aria-label','Item name');a.value=name;const b=document.createElement('input');b.type='number';b.min='0';b.step='.01';b.placeholder='0.00';b.setAttribute('aria-label','Price');b.value=price;const c=document.createElement('button');c.type='button';c.className='remove';c.textContent='×';c.title='Remove item';c.setAttribute('aria-label','Remove item');a.addEventListener('input',render);b.addEventListener('input',render);c.addEventListener('click',()=>{row.remove();if(!$('items').children.length)addItem();render()});row.append(a,b,c);$('items').append(row);itemCount++;render()}
+function getItems(){return [...$('items').querySelectorAll('.item-row')].map(r=>{const x=r.querySelectorAll('input');return{name:x[0].value.trim(),price:Math.max(0,Number(x[1].value)||0),hasPrice:x[1].value.trim()!==''}})}
+function dateText(v){if(!v)return'—';const[y,m,d]=v.split('-');return `${m}-${d}-${y.slice(-2)}`}
+function put(id,v){$(id).textContent=v||'—'}
+function render(){put('pShop',$('shop').value||'ReireiAfterSugal');put('pNo',$('invoiceNo').value||'—');put('pDate',dateText($('invoiceDate').value));put('pLocation',$('location').value);put('pSchedule','Monday / Wednesday / Friday / Sunday');put('pCourier','LBC / Lalamove / Flash');put('pGcash',$('gcash').value);put('pBank',$('bank').value);put('pPaypal',$('paypal').value);put('pThanks',$('thanks').value);const list=$('pItems');list.replaceChildren();let total=0,shown=0;getItems().forEach(it=>{if(!it.name&&!it.hasPrice)return;shown++;total+=it.price;const line=document.createElement('div');line.className='line-item';const n=document.createElement('span');n.textContent=it.name||'Item Name';const p=document.createElement('span');p.className='amount';p.textContent=money(it.price);line.append(n,p);list.append(line)});if(!shown){const e=document.createElement('div');e.className='empty';e.textContent='Your items will appear here';list.append(e)}$('pTotal').textContent=money(total)}
+function invoiceText(){const items=getItems().filter(i=>i.name||i.hasPrice);return ['INVOICE',$('shop').value,`Invoice No. ${$('invoiceNo').value} • Date: ${dateText($('invoiceDate').value)}`,'','ITEM                         PRICE',...items.map(i=>`${i.name||'Item Name'}    ${money(i.price)}`),'',`TOTAL                         ${money(items.reduce((s,i)=>s+i.price,0))}`,'','LOCATION',$('location').value,'','SHIPPING SCHEDULE','Monday / Wednesday / Friday / Sunday','','SHIPPING','LBC / Lalamove / Flash','','PAYMENT METHOD',`GCASH: ${$('gcash').value}`,'(FOR QR JUST REQUEST)',`BANK TRANSFER: ${$('bank').value}`,`PAYPAL: ${$('paypal').value}`,'',$('thanks').value].join('\\n')}
+async function exportImage(type){
+  // Render the invoice directly on a canvas instead of relying on SVG foreignObject,
+  // which many browsers block when exporting HTML to an image.
+  const scale=2, width=900, pad=54, inner=width-pad*2;
+  const canvas=document.createElement('canvas'); const ctx=canvas.getContext('2d');
+  const ink='#161210', cream='#fff8ec', cream2='#efe8d6', pink='#ff2d78', pinkdeep='#d4004f', purple='#5a2a91';
+  const shop=$('shop').value||'ReireiAfterSugal', no=$('invoiceNo').value||'—', date=dateText($('invoiceDate').value);
+  const items=getItems().filter(i=>i.name||i.hasPrice); const total=items.reduce((sum,i)=>sum+i.price,0);
+  const fontMono='700 18px "Space Mono", monospace', fontSmall='16px "Space Mono", monospace';
+  let y=46;
+  // Measure content first using a temporary canvas at final scale.
+  const measure=document.createElement('canvas').getContext('2d');
+  function wrap(text,font,maxWidth){measure.font=font;const words=String(text??'—').split(/\s+/);const lines=[];let line='';for(const word of words){const test=line?line+' '+word:word;if(measure.measureText(test).width>maxWidth&&line){lines.push(line);line=word}else line=test}if(line)lines.push(line);return lines.length?lines:['—']}
+  const chunks=[]; function addText(text,font,color=ink,maxWidth=inner,lineH=26){const lines=wrap(text,font,maxWidth);chunks.push({type:'text',lines,font,color,y,lineH});y+=lines.length*lineH}
+  function addRule(margin=20){y+=margin;chunks.push({type:'rule',y});y+=margin+2}
+  function addSection(label,value){y+=12;addText(label.toUpperCase(),'700 15px "Space Mono", monospace',purple,inner,22);addText(value,fontSmall,ink,inner,25)}
+  // Top brand/title and meta
+  addText(shop,'34px Anton, Impact, sans-serif',ink,inner-100,42); y+=3;
+  addText('INVOICE','64px Anton, Impact, sans-serif',ink,inner,70);
+  addText('INVOICE NO. '+no+'    •    DATE: '+date,'16px "Space Mono", monospace',ink,inner,25);
+  addRule(20); addText('ITEM','700 16px "Space Mono", monospace',ink,inner*.68,24);
+  // price heading right-aligned later
+  chunks.push({type:'rightText',text:'PRICE',font:'700 16px "Space Mono", monospace',color:ink,y:y-24});
+  for(const it of items){const lines=wrap(it.name||'Item Name',fontSmall,inner-190);const lineH=26;chunks.push({type:'item',lines,price:money(it.price),y,lineH});y+=Math.max(1,lines.length)*lineH+4}
+  if(!items.length){addText('Your items will appear here',fontSmall,'#777777',inner,25)}
+  addRule(14);
+  chunks.push({type:'total',y,total:money(total)}); y+=45; addRule(8);
+  addSection('⌖ Location',$('location').value||'—');
+  addSection('↗ Shipping schedule','Monday / Wednesday / Friday / Sunday');
+  addSection('↗ Shipping','LBC / Lalamove / Flash');
+  addRule(8); addSection('Payment method','GCASH: '+($('gcash').value||'—'));
+  addText('(FOR QR JUST REQUEST)',fontSmall,ink,inner,25);
+  addText('BANK TRANSFER: '+($('bank').value||'—'),fontSmall,ink,inner,25);
+  addText('PAYPAL: '+($('paypal').value||'—'),fontSmall,ink,inner,25);
+  addRule(10); addText($('thanks').value||'Thank you for The Budol! 🤝','26px Anton, Impact, sans-serif',ink,inner,32);
+  addText('THANK YOU FOR SHOPPING SMALL ♡','13px "Space Mono", monospace',ink,inner,22); y+=35;
+  const height=Math.max(700,y+18); canvas.width=width*scale;canvas.height=height*scale;ctx.scale(scale,scale);
+  ctx.fillStyle=cream2;ctx.fillRect(0,0,width,height);
+  // subtle dotted paper texture
+  ctx.fillStyle='#d8cfbb';for(let yy=10;yy<height;yy+=22)for(let xx=10;xx<width;xx+=22){ctx.beginPath();ctx.arc(xx,yy,1,0,Math.PI*2);ctx.fill()}
+  ctx.fillStyle=cream;ctx.strokeStyle=ink;ctx.lineWidth=4;ctx.fillRect(24,24,width-48,height-48);ctx.strokeRect(24,24,width-48,height-48);
+  // corner stamp
+  ctx.save();ctx.translate(width-118,62);ctx.rotate(.45);ctx.fillStyle=pink;ctx.strokeStyle=ink;ctx.lineWidth=2;ctx.fillRect(-83,-15,166,30);ctx.strokeRect(-83,-15,166,30);ctx.fillStyle=ink;ctx.font='16px Anton, Impact, sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('BUDOL RECEIPT',0,0);ctx.restore();
+  for(const c of chunks){
+    if(c.type==='rule'){ctx.strokeStyle=ink;ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(pad,c.y);ctx.lineTo(width-pad,c.y);ctx.stroke();continue}
+    if(c.type==='rightText'){ctx.font=c.font;ctx.fillStyle=c.color;ctx.textAlign='right';ctx.textBaseline='top';ctx.fillText(c.text,width-pad,c.y);continue}
+    if(c.type==='item'){ctx.font=fontSmall;ctx.fillStyle=ink;ctx.textAlign='left';ctx.textBaseline='top';c.lines.forEach((line,i)=>ctx.fillText(line,pad,c.y+i*c.lineH));ctx.font=fontMono;ctx.textAlign='right';ctx.fillText(c.price,width-pad,c.y);continue}
+    if(c.type==='total'){ctx.font='30px Anton, Impact, sans-serif';ctx.fillStyle=ink;ctx.textAlign='left';ctx.textBaseline='top';ctx.fillText('TOTAL',pad,c.y);ctx.fillStyle=pinkdeep;ctx.textAlign='right';ctx.font='36px Anton, Impact, sans-serif';ctx.fillText(c.total,width-pad,c.y-2);continue}
+    ctx.font=c.font;ctx.fillStyle=c.color;ctx.textAlign='left';ctx.textBaseline='top';c.lines.forEach((line,i)=>ctx.fillText(line,pad,c.y+i*c.lineH));
+  }
+  canvas.toBlob(blob=>{if(!blob){alert('Could not create the image. Please try again.');return}const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='ReireiAfterSugal-Invoice-'+(no||'1')+'.'+(type==='jpeg'?'jpg':'png');document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),2000)},type==='jpeg'?'image/jpeg':'image/png',.95);
+}
+$('addItem').addEventListener('click',()=>addItem());$('pngBtn').addEventListener('click',()=>exportImage('png'));$('jpgBtn').addEventListener('click',()=>exportImage('jpeg'));$('copyBtn').addEventListener('click',async()=>{try{await navigator.clipboard.writeText(invoiceText());$('copyBtn').textContent='Copied!';setTimeout(()=>$('copyBtn').textContent='Copy text',1500)}catch(e){prompt('Copy your invoice text:',invoiceText())}});$('resetBtn').addEventListener('click',()=>{$('shop').value='ReireiAfterSugal';$('invoiceNo').value='1';$('invoiceDate').value='2026-10-29';$('location').value='Quezon City, NCR';$('gcash').value='09672473246 AN****Y JO*N C.';$('bank').value='To Be Added';$('paypal').value='To Be Added';$('thanks').value='Thank you for The Budol! 🤝';$('items').replaceChildren();addItem();addItem();addItem();render()});document.querySelectorAll('.editor input,.editor select').forEach(el=>{el.addEventListener('input',render);el.addEventListener('change',render)});addItem();addItem();addItem();
+})();
+</script>
+</body></html>
